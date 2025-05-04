@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>STA File Viewer</title>
+  <style>
+    body {
+      font-family: monospace;
+      margin: 40px;
+      background-color: #f8f9fa;
+    }
+    pre {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      padding: 20px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      max-width: 100%;
+      overflow-x: auto;
+    }
+    .download {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>STA File Viewer</h2>
+  <div class="download">
+    <a href="sta.txt" download>⬇️ Download sta.txt</a>
+  </div>
+  <pre id="fileContent">
+Loading content...
+  </pre>
+
+  <script>
+    fetch('sta.txt')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('fileContent').textContent = data;
+      })
+      .catch(error => {
+        document.getElementById('fileContent').textContent = "Failed to load sta.txt";
+      });
+  </script>
+</body>
+</html>
