@@ -2,220 +2,45 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>View and Download STA File</title>
+  <title>STA File Viewer</title>
+  <style>
+    body {
+      font-family: monospace;
+      margin: 40px;
+      background-color: #f8f9fa;
+    }
+    pre {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      padding: 20px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      max-width: 100%;
+      overflow-x: auto;
+    }
+    .download {
+      margin-bottom: 20px;
+    }
+  </style>
 </head>
 <body>
-  <h2>View Your STA File</h2>
-
-  <button onclick="downloadFile()">Download sta.txt</button>
-  <pre id="fileContent" style="white-space: pre-wrap; background:#f0f0f0; padding:10px; border:1px solid #ccc; max-height:500px; overflow:auto;"></pre>
+  <h2>STA File Viewer</h2>
+  <div class="download">
+    <a href="sta.txt" download>⬇️ Download sta.txt</a>
+  </div>
+  <pre id="fileContent">
+Loading content...
+  </pre>
 
   <script>
-    // Contents of your sta.txt file
-    const fileText = `#A/B
-
-
-set.seed(123)
-nsamples <- 25000
-
-
-prior_A <- runif(nsamples, 0, 1)
-prior_B <- runif(nsamples, 0, 1)
-
-
-gen_model <- function(rate, size) {
-  rbinom(1, size = size, prob = rate)
-}
-
-
-sim_A <- rep(NA, nsamples)
-sim_B <- rep(NA, nsamples)
-
-for (i in 1:nsamples) {
-  sim_A[i] <- gen_model(prior_A[i], size = 16)
-  sim_B[i] <- gen_model(prior_B[i], size = 23)
-}
-
-
-post_A <- prior_A[sim_A == 6]
-post_B <- prior_B[sim_B == 12]
-
-
-cat("Posterior A samples:", length(post_A), "\\n")
-cat("Posterior B samples:", length(post_B), "\\n")
-
-if (length(post_A) > 0 && length(post_B) > 0) {
-  par(mfrow = c(1, 2))
-  hist(post_A, xlim = c(0, 1), main = "Posterior A (6/16)", xlab = "Conversion A", col = "skyblue", breaks = 30)
-  hist(post_B, xlim = c(0, 1), main = "Posterior B (12/23)", xlab = "Conversion B", col = "salmon", breaks = 30)
-
-  
-  min_len <- min(length(post_A), length(post_B))
-  prob_B_better <- mean(post_B[1:min_len] > post_A[1:min_len])
-  cat("P(rate_B > rate_A) =", prob_B_better, "\\n")
-} else {
-  cat("Insufficient samples for posterior. Consider using a tolerance.\\n")
-}
-
-#MCMC
-
-#Target function
-target<-function(x)
-{
-dexp(x,2)
-}
-
-#sampling function
-sampling<-function(x)
-{
-rnorm(1,mean=x,sd=1)
-}
-# Creating empty vector
-stored<-rep(NA,10^4)
-
-#intial value
-xt=0.4
-
-# Looping over the vector
-for(i in 1:10^4)
-{
-xtn <-sampling(xt)
-ratio<-min(1,target(xtn)/target(xt))
-accept<-runif(1)<ratio
-stored[i]<-ifelse(accept,xtn,xt)
-xt <-stored[i]
-}
-
-plot(stored,type='l')
-
-x11()
-
-hist(stored,breaks=30)
-
-#sir
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Observed data
-time = np.array([0, 1, 2, 3, 4,5,6,7,8,9,10,11,12,13,14])
-infected_obs = np.array([1, 3, 7, 15, 30, 80, 134, 270, 312, 340,360,345,363,390,382])
-
-# SIR model simulation
-def sir_model(beta, gamma, days, S0=1000000, I0=1, R0=0):
-    S, I, R = [S0], [I0], [R0]
-    for t in range(1, days):
-        dS = -beta * S[-1] * I[-1] / (S0 + I0 + R0)
-        dI = beta * S[-1] * I[-1] / (S0 + I0 + R0) - gamma * I[-1]
-        dR = gamma * I[-1]
-        S.append(S[-1] + dS)
-        I.append(I[-1] + dI)
-        R.append(R[-1] + dR)
-    return np.array(I)
-
-# Log-likelihood function
-def log_likelihood(beta, gamma):
-    I_model = sir_model(beta, gamma, 15)
-    return -np.sum((infected_obs - I_model[:len(infected_obs)])**2)
-
-# MCMC sampling
-def mcmc(num_samples=100000):
-    beta_samples = []
-    gamma_samples = []
-    beta_current = np.random.uniform(0, 1)
-    gamma_current = np.random.uniform(0, 1)
-
-    for _ in range(num_samples):
-        beta_proposed = beta_current + np.random.normal(0, 0.05)
-        gamma_proposed = gamma_current + np.random.normal(0, 0.05)
-
-        if beta_proposed < 0 or beta_proposed > 1 or gamma_proposed < 0 or gamma_proposed > 1:
-            continue
-
-        likelihood_current = log_likelihood(beta_current, gamma_current)
-        likelihood_proposed = log_likelihood(beta_proposed, gamma_proposed)
-
-        acceptance_ratio = np.exp(likelihood_proposed - likelihood_current)
-
-        if np.random.rand() < acceptance_ratio:
-            beta_current = beta_proposed
-            gamma_current = gamma_proposed
-
-        beta_samples.append(beta_current)
-        gamma_samples.append(gamma_current)
-
-    return beta_samples, gamma_samples
-
-# Run MCMC
-beta_samples, gamma_samples = mcmc()
-plt.figure(figsize=(12,6))
-plt.subplot(121)
-plt.hist(beta_samples, bins=30)
-plt.title("Posterior Distribution of Beta")
-plt.subplot(122)
-plt.hist(gamma_samples, bins=30)
-plt.title("Posterior Distribution of Gamma")
-plt.show()
-
-B=0.99
-G=0.45
-I_Prediction = sir_model(B, G, 50)
-print(I_Prediction)
-
-x=list(range(1,50))
-plt.plot(x, I_Prediction[0:49], marker='o', linestyle='-', color='b', label='Line 1')
-plt.title('Expected Daywise infection')
-plt.xlabel('Days')
-plt.ylabel('Number of infections')
-plt.legend()
-plt.show()
-
-#logisttic
-
-require("datasets")
-data("iris")
-str(iris)
-
-head(iris)
-
-iris$Species_binary <- ifelse(iris$Species == "setosa", 1, 0)
-
-Y <- iris$Species_binary
-X <- iris$Sepal.Length
-
-plot(X, Y, col=Y+2, pch=19, xlab="Sepal Length", ylab="Species (Setosa=1, Others=0)")
-legend("topright", legend=c("Non-Setosa", "Setosa"), col=c(3,2), pch=19)
-
-model_logit <- glm(Y ~ X, family = binomial)
-summary(model_logit)
-
-x_range <- seq(min(X), max(X), length=100)
-y_predicted <- predict(model_logit, newdata=data.frame(X=x_range), type="response")
-lines(x_range, y_predicted, col="blue", lwd=3)
-
-newdata <- data.frame(X=5.5)
-predicted_prob <- predict(model_logit, newdata=newdata, type="response")
-print(predicted_prob)
-
-if(predicted_prob > 0.5){
-  print("Predicted Class: Setosa (1)")
-} else {
-  print("Predicted Class: Non-Setosa (0)")
-}
-`;
-
-    // Show in browser
-    document.getElementById("fileContent").textContent = fileText;
-
-    // Enable file download
-    function downloadFile() {
-      const blob = new Blob([fileText], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "sta.txt";
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+    fetch('sta.txt')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('fileContent').textContent = data;
+      })
+      .catch(error => {
+        document.getElementById('fileContent').textContent = "Failed to load sta.txt";
+      });
   </script>
 </body>
 </html>
