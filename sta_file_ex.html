@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>STA File Viewer</title>
+  <title>Text File Viewer</title>
   <style>
     body {
       font-family: monospace;
@@ -24,22 +24,22 @@
   </style>
 </head>
 <body>
-  <h2>STA File Viewer</h2>
+  <h2>Text File Viewer</h2>
   <div class="download">
-    <a href="sta.txt" download>⬇️ Download sta.txt</a>
+    <a href="mydata.txt" download>⬇️ Download mydata.txt</a>
   </div>
   <pre id="fileContent">
 Loading content...
   </pre>
 
   <script>
-    fetch('sta.txt')
+    fetch('mydata.txt')
       .then(response => response.text())
       .then(data => {
         document.getElementById('fileContent').textContent = data;
       })
       .catch(error => {
-        document.getElementById('fileContent').textContent = "Failed to load sta.txt";
+        document.getElementById('fileContent').textContent = "Failed to load the file.";
       });
   </script>
 </body>
